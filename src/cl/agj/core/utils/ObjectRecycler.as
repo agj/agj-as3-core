@@ -3,8 +3,6 @@ package cl.agj.core.utils {
 	
 	import flash.errors.IllegalOperationError;
 	import flash.utils.Dictionary;
-	import flash.utils.getDefinitionByName;
-	import flash.utils.getQualifiedClassName;
 	
 	/**
 	 * Singleton that manages reusable objects, so as to minimize repeated creation and destruction of the same kind
@@ -16,7 +14,7 @@ package cl.agj.core.utils {
 	
 	public class ObjectRecycler {
 		
-		protected var _collection:Dictionary;
+		protected var _collection:Dictionary = new Dictionary;
 		
 		private static var _instance:ObjectRecycler;
 		private static var _allowInstantiation:Boolean;
@@ -25,8 +23,6 @@ package cl.agj.core.utils {
 			if (!_allowInstantiation) {
 				throw new IllegalOperationError("Use the 'instance' property instead of the 'new' keyword for this singleton class.");
 			}
-			
-			_collection = new Dictionary;
 		}
 		
 		public static function get instance():ObjectRecycler {
@@ -44,19 +40,22 @@ package cl.agj.core.utils {
 			if (object is IRecyclable)
 				IRecyclable(object).sleep();
 			
-			var classObj:Class = Class(object.constructor);
+			var type:Class = Class(object.constructor);
 			
-			var oldNode:LinkedListNode = _collection[classObj];
-			_collection[classObj] = new LinkedListNode(object, oldNode ? oldNode : null);
+			var oldNode:LinkedListNode = _collection[type];
+			_collection[type] = new LinkedListNode(object, oldNode ? oldNode : null);
 		}
 		
-		public function get(objectClass:Class, ... parameters):Object {
+		public function get(type:Class, ... parameters):Object {
 			var object:Object;
-			var node:LinkedListNode = _collection[objectClass];
+			var node:LinkedListNode = _collection[type];
+			
+			if (!(type is IDestroyable) && parameters.length > 0)
+				throw new IllegalOperationError("Non-supported use case: Parameters passed for a type that does not implement IDestroyable.");
 			
 			while (node) {
 				object = node.head;
-				_collection[objectClass] = object.tail;
+				_collection[type] = object.tail;
 				if (object is IDestroyable && object.destroyed) {
 					node = node.tail;
 					continue;
@@ -66,57 +65,57 @@ package cl.agj.core.utils {
 				return object;
 			}
 			
-			object = makeInstance(objectClass, parameters);
+			object = makeInstance(type, parameters);
 			return object;
 		}
 		
 		/////
 		
-		protected function makeInstance(objectClass:Class, parameters:Array):Object {
+		protected function makeInstance(type:Class, parameters:Array):Object {
 			var p:Array = parameters;
 			var obj:Object;
 			switch (parameters.length) {
 				case 0:
-					obj = new objectClass();
+					obj = new type();
 					break;
 				case 1:
-					obj = new objectClass(p[0]);
+					obj = new type(p[0]);
 					break;
 				case 2:
-					obj = new objectClass(p[0], p[1]);
+					obj = new type(p[0], p[1]);
 					break;
 				case 3:
-					obj = new objectClass(p[0], p[1], p[2]);
+					obj = new type(p[0], p[1], p[2]);
 					break;
 				case 4:
-					obj = new objectClass(p[0], p[1], p[2], p[3]);
+					obj = new type(p[0], p[1], p[2], p[3]);
 					break;
 				case 5:
-					obj = new objectClass(p[0], p[1], p[2], p[3], p[4]);
+					obj = new type(p[0], p[1], p[2], p[3], p[4]);
 					break;
 				case 6:
-					obj = new objectClass(p[0], p[1], p[2], p[3], p[4], p[5]);
+					obj = new type(p[0], p[1], p[2], p[3], p[4], p[5]);
 					break;
 				case 7:
-					obj = new objectClass(p[0], p[1], p[2], p[3], p[4], p[5], p[6]);
+					obj = new type(p[0], p[1], p[2], p[3], p[4], p[5], p[6]);
 					break;
 				case 8:
-					obj = new objectClass(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
+					obj = new type(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
 					break;
 				case 9:
-					obj = new objectClass(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]);
+					obj = new type(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]);
 					break;
 				case 10:
-					obj = new objectClass(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]);
+					obj = new type(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]);
 					break;
 				case 11:
-					obj = new objectClass(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10]);
+					obj = new type(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10]);
 					break;
 				case 12:
-					obj = new objectClass(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11]);
+					obj = new type(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11]);
 					break;
 				default:
-					throw new ArgumentError("Too many parameters passed for object constructor. ObjectRecycler can't handle it for now.");
+					throw new IllegalOperationError("Too many parameters (over 12) passed for object constructor.");
 			}
 			return obj;
 		}

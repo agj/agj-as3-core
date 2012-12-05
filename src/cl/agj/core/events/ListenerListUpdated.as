@@ -1,56 +1,49 @@
 package cl.agj.core.events {
-	import cl.agj.core.events.ListenerVO;
-	
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	
-	/**
-	 * Deprecated in favor of ListenerListUpdated, but changes haven't reflected this yet.
-	 */
-	public class ListenerList {
+	public class ListenerListUpdated {
 		
-		public var _list:Vector.<ListenerVO>;
+		public var _list:Dictionary = new Dictionary(true);
 		
-		public function ListenerList() {
-			_list = new Vector.<ListenerVO>;
+		public function ListenerListUpdated() {
+			
 		}
 		
 		public function add(object:IEventDispatcher, eventType:String, listener:Function, useCapture:Boolean = false):void {
-			if (getListenerIndex(object, eventType, listener, useCapture) < 0) {
-				_list.push(new ListenerVO(object, eventType, listener, useCapture));
+			if (!getListener(object, eventType, listener, useCapture)) {
+				_list[new ListenerVO(object, eventType, listener, useCapture)] = true;
 			}
 		}
 		
 		public function remove(object:IEventDispatcher, eventType:String, listener:Function, useCapture:Boolean = false):void {
-			var index:int = getListenerIndex(object, eventType, listener, useCapture);
-			if (index >= 0) {
-				_list.splice(index, 1);
+			var lvo:ListenerVO = getListener(object, eventType, listener, useCapture);
+			if (lvo) {
+				delete _list[lvo];
 			}
 		}
 		
 		public function clear():void {
-			while (_list.length > 0) {
-				_list.pop();
+			var lvo:ListenerVO;
+			for (lvo in _list) {
+				delete _list[lvo];
 			}
 		}
 		
 		public function hasListener(object:IEventDispatcher, eventType:String, listener:Function, useCapture:Boolean = false):Boolean {
-			if (getListenerIndex(object, eventType, listener, useCapture) >= 0)
+			if (getListener(object, eventType, listener, useCapture))
 				return true;
-			
 			return false;
 		}
 		
-		public function getListenerIndex(object:IEventDispatcher, eventType:String, listener:Function, useCapture:Boolean):int {
+		public function getListener(object:IEventDispatcher, eventType:String, listener:Function, useCapture:Boolean):ListenerVO {
 			var lvo:ListenerVO;
-			var len:int = _list.length;
-			for (var i:int = 0; i < len; i++) {
-				lvo = _list[i];
+			for (lvo in _list) {
 				if (lvo.object === object && lvo.type === eventType && lvo.listener === listener && lvo.useCapture === useCapture) {
-					return i;
+					return lvo;
 				}
 			}
-			return -1;
+			return null;
 		}
 		
 		/**
@@ -58,12 +51,13 @@ package cl.agj.core.events {
 		 * matching listeners.
 		 */
 		public function getMatchingListeners(object:IEventDispatcher = null, eventType:String = null, listener:Function = null, useCapture:Object = null):Vector.<ListenerVO> {
+			var lvo:ListenerVO;
 			var result:Vector.<ListenerVO> = new Vector.<ListenerVO>;
 			var useCaptureIsBoolean:Boolean = (useCapture is Boolean);
-			for each (var lvo:ListenerVO in _list) {
+			for (lvo in _list) {
 				if ( (!object || object === lvo.object)
 					&& (!eventType || eventType === lvo.type)
-					&& (listener == null || listener === lvo.listener)
+					&& (!listener || listener === lvo.listener)
 					&& (!useCaptureIsBoolean || useCapture === lvo.useCapture)
 				) {
 					
@@ -73,10 +67,13 @@ package cl.agj.core.events {
 			return result;
 		}
 		
-		/////
-		
-		public function get list():Vector.<ListenerVO> {
-			return _list;
+		public function getList():Vector.<ListenerVO> {
+			var lvo:ListenerVO;
+			var result:Vector.<ListenerVO> = new Vector.<ListenerVO>;
+			for (lvo in _list) {
+				result.push(lvo);
+			}
+			return result;
 		}
 		
 	}

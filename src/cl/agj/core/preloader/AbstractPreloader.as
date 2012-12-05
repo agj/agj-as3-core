@@ -3,15 +3,12 @@ package cl.agj.core.preloader {
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.utils.getDefinitionByName;
-	import flash.utils.getQualifiedClassName;
 	
 	/**
 	 * A class intended to be extended in order to make a preloader with. Has the basic necessary stuff already in place.
 	 * @author agj
 	 */
 	public class AbstractPreloader extends MovieClip {
-		
-		internal const CLASS_NAME:String = "cl.agj.components::AbstractPreloader";
 		
 		/**
 		 * Keeps track of load progress; 1 equals 100%.
@@ -20,15 +17,11 @@ package cl.agj.core.preloader {
 		/**
 		 * Important! Set this variable to the main class name ("Main" by default).
 		 */
-		protected var _mainClassName:String;
+		protected var _mainClassName:String = "Main";
 		
 		protected var _lastByteCount:uint;
 		
 		public function AbstractPreloader() {
-			if (getQualifiedClassName(this) == CLASS_NAME) {
-            	throw new Error("This is an abstract class and is not meant for instantiation; it should only be extended.");
-			}
-			_mainClassName = "Main";
 			if (stage) init();
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}

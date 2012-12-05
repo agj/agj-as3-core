@@ -1,8 +1,8 @@
 package cl.agj.core {
-	import org.osflash.signals.DeluxeSignal;
-	import org.osflash.signals.Signal;
-	import org.osflash.signals.events.GenericEvent;
 	import cl.agj.core.utils.Destroyer;
+	
+	import org.osflash.signals.DeluxeSignal;
+	import org.osflash.signals.events.GenericEvent;
 	
 	public class Destroyable implements IDestroyable {
 		

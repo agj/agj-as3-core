@@ -6,6 +6,7 @@ package cl.agj.core.utils {
 	import flash.events.TimerEvent;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
+	import flash.utils.getTimer;
 	
 	/**
 	 * A collection of static functions for different purposes.
@@ -18,7 +19,7 @@ package cl.agj.core.utils {
 		 * and another with an AND-conditioned list of forbidden matches. Either of these two vectors are
 		 * optional. If no vectors are passed, the function always returns true.
 		 */
-		public static function multipleStringMatch(string:String, requiredMatches:Vector.<String> = null, forbiddenMatches:Vector.<String> = null):Boolean {
+		static public function multipleStringMatch(string:String, requiredMatches:Vector.<String> = null, forbiddenMatches:Vector.<String> = null):Boolean {
 			var okay:Boolean = false;
 			var item:String;
 			
@@ -48,7 +49,7 @@ package cl.agj.core.utils {
 		/**
 		 *  Check if we are on debug or release mode. (Copied from Adam Saltsman's Flixel code.)
 		 */
-		public static function get isDebugBuild():Boolean {
+		static public function get isDebugBuild():Boolean {
 			var err:Error = new Error;
 			var re:RegExp = /\[.*:[0-9]+\]/;
 			return re.test(err.getStackTrace());
@@ -66,7 +67,7 @@ package cl.agj.core.utils {
 		/**
 		 * Checks if this is playing as a SWF file run by Flash Player.
 		 */
-		public static function isSWF(stage:Stage):Boolean {
+		static public function isSWF(stage:Stage):Boolean {
 			return (stage.root.loaderInfo.url.search(/.swf$/) >= 0);
 		}
 		
@@ -74,7 +75,7 @@ package cl.agj.core.utils {
 		 * Returns a string containing string representations of every property, and property thereof,
 		 * of the pased object.
 		 */
-		public static function examineRecursively(object:Object, prepend:String = "-"):String {
+		static public function examineRecursively(object:Object, prepend:String = "-"):String {
 			var result:String = "";
 			for (var s:String in object) {
 				result += prepend + s + ": " + object[s] + "\n";
@@ -87,7 +88,7 @@ package cl.agj.core.utils {
 		 * Executes the passed function the next frame. Useful to make sure the screen gets updated before
 		 * a processing-intensive operation.
 		 */
-		public static function callNextFrame(callback:Callback):void {
+		static public function callNextFrame(callback:Callback):void {
 			if (!_forNextFrame)
 				_forNextFrame = new Vector.<Callback>;
 			_forNextFrame.push(callback);
@@ -97,22 +98,59 @@ package cl.agj.core.utils {
 			_dispatcher.addEventListener(Event.ENTER_FRAME, onFrameJump);
 		}
 		
-		public static function callLater(callback:Callback, time:uint):void {
+		static public function callLater(callback:Callback, time:uint):void {
+			var now:uint = getTimer();
+			var ringTime:uint = now + time;
+			if (!_forLater)
+				_forLater = new Dictionary;
+			var callbacks:Vector.<Callback> = _forLater[ringTime] ||= new Vector.<Callback>;
+			callbacks.push(callback);
+			
+			checkAndRestartLaterTimer(false);
+			
+			/*
 			var timer:Timer = new Timer(time, 1);
 			timer.addEventListener(TimerEvent.TIMER_COMPLETE, onCallLaterTimer);
 			if (!_forLater)
 				_forLater = new Dictionary(true);
 			_forLater[timer] = callback;
 			timer.start();
+			*/
+		}
+		static private function checkAndRestartLaterTimer(callOutstanding:Boolean = true):void {
+			if (!_laterTimer) {
+				_laterTimer = new Timer(0, 1);
+				_laterTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onLaterTimer);
+			}
+			_laterTimer.stop();
+			_laterTimer.reset();
+			
+			var now:uint = getTimer();
+			var next:Number = NaN;
+			for (var time:Object in _forLater) {
+				if (callOutstanding && time <= now) {
+					for each (var cb:Callback in _forLater[time]) {
+						callCallback(cb);
+					}
+					delete _forLater[time];
+				} else if (time < next || isNaN(next)) {
+					next = uint(time);
+				}
+			}
+			if (!isNaN(next)) {
+				_laterTimer.delay = Math.max(next - now, 0);
+				_laterTimer.start();
+			}
 		}
 		
 		//////////////
 		
-		private static var _forNextFrame:Vector.<Callback>;
-		private static var _forLater:Dictionary;
-		private static var _dispatcher:Shape;
+		static private var _forNextFrame:Vector.<Callback>;
+		static private var _laterTimer:Timer;
+		static private var _forLater:Dictionary;
+		static private var _dispatcher:Shape;
 		
-		private static function onFrameJump(e:Event):void {
+		static private function onFrameJump(e:Event):void {
 			_dispatcher.removeEventListener(Event.ENTER_FRAME, onFrameJump);
 			
 			for each (var call:Callback in _forNextFrame) {
@@ -121,7 +159,12 @@ package cl.agj.core.utils {
 			_forNextFrame.splice(0, _forNextFrame.length);
 		}
 		
-		private static function onCallLaterTimer(e:TimerEvent):void {
+		static private function onLaterTimer(e:TimerEvent):void {
+			checkAndRestartLaterTimer();
+		}
+		
+		/*
+		static private function onCallLaterTimer(e:TimerEvent):void {
 			var timer:Timer = Timer(e.currentTarget);
 			timer.removeEventListener(TimerEvent.TIMER_COMPLETE, onCallLaterTimer);
 			var callback:Callback = _forLater[timer];
@@ -130,9 +173,10 @@ package cl.agj.core.utils {
 			callCallback(callback);
 			delete _forLater[timer];
 		}
+		*/
 		
-		private static function callCallback(callback:Callback):void {
-			if (callback.func !== null)
+		static private function callCallback(callback:Callback):void {
+			if (callback && callback.func !== null)
 				callback.func.apply(callback.context, ((callback.params) ? callback.params : []));
 		}
 		

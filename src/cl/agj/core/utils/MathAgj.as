@@ -1,8 +1,5 @@
-package cl.agj.core.utils
-{
-	import flash.display.Shape;
+package cl.agj.core.utils {
 	import flash.geom.Point;
-	import flash.utils.getDefinitionByName;
 	
 	/**
 	 * ...
@@ -26,7 +23,7 @@ package cl.agj.core.utils
 		 * 
 		 * @param chance	The higher the number, the better the chance that it will return 'true'.
 		 */
-		public static function coinToss(chance:Number = 0.5):Boolean {
+		public static function tossCoin(chance:Number = 0.5):Boolean {
 			return (Math.random() < chance);
 		}
 		
@@ -82,8 +79,10 @@ package cl.agj.core.utils
 		 * @return					A number between 0 (or ''valueSubstract'') and ''peak''.
 		 */
 		public static function curve(value:Number, gentleness:Number, peak:Number = 1, valueSubstract:Number = 0):Number {
-			if (valueSubstract) value = Math.max(value - valueSubstract, 0);
-			if (gentleness < 1) gentleness = 1;
+			if (valueSubstract)
+				value = Math.max(value - valueSubstract, 0);
+			if (gentleness < 1)
+				gentleness = 1;
 			return peak / ((value / gentleness) +1);
 		}
 		
@@ -107,14 +106,19 @@ package cl.agj.core.utils
 		}
 		
 		public static function rotatePoint(point:Point, radians:Number = 0, returnNewPoint:Boolean = false):Point {
-			var pt:Point = (returnNewPoint) ? point.clone() : point;
+			if (returnNewPoint)
+				point = point.clone();
 			
-			if (radians == 0) return pt;
+			if (radians === 0)
+				return point;
 			
-			var angle:Number = cartesianToRadians(pt.x, pt.y); //Math.atan2(pt.y, pt.x);
-			if (isNaN(angle)) angle = 0;
-			pt = Point.polar(pt.length, angle + radians);
-			return pt;
+			var angle:Number = cartesianToRadians(point.x, point.y); //Math.atan2(pt.y, pt.x);
+			if (isNaN(angle))
+				angle = 0;
+			var rotated:Point = Point.polar(point.length, angle + radians);
+			point.x = rotated.x;
+			point.y = rotated.y;
+			return point;
 		}
 		
 		public static function cartesianToRadians(x:Number, y:Number):Number {
@@ -153,6 +157,7 @@ package cl.agj.core.utils
 			return r;
 		}
 		
+		/** Isn't this a repeat of Point.interpolate? */
 		public static function interPoint(pt1:Point, pt2:Point, fractionFromPt1:Number = 0.5):Point {
 			var r:Point = pt1.clone();
 			r.x -= pt2.x; r.y -= pt2.y;
