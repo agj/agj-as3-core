@@ -1,12 +1,7 @@
 package cl.agj.core.net {
 	
-	import cl.agj.core.utils.Destroyer;
-	import cl.agj.core.TidyEventDispatcher;
-	
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoader;
@@ -14,6 +9,9 @@ package cl.agj.core.net {
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
+	
+	import cl.agj.core.TidyEventDispatcher;
+	import cl.agj.core.utils.Destroyer;
 	
 	import org.osflash.signals.Signal;
 	

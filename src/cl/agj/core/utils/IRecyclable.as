@@ -7,8 +7,6 @@ package cl.agj.core.utils {
 	 * @author agj
 	 */
 	public interface IRecyclable {
-		// TODO: change activate for wake
-		//       change asleep for isAsleep
 		
 		function sleep():void;
 		function wake(... params):void;

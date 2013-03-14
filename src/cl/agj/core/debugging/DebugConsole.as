@@ -1,8 +1,4 @@
 package cl.agj.core.debugging {
-	import cl.agj.core.TidyListenerRegistrar;
-	import cl.agj.graphics.Draw;
-	import cl.agj.graphics.DrawStyle;
-	
 	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.display.Stage;
@@ -10,6 +6,10 @@ package cl.agj.core.debugging {
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	
+	import cl.agj.core.TidyListenerRegistrar;
+	import cl.agj.graphics.Draw;
+	import cl.agj.graphics.DrawStyle;
 	
 	/**
 	 * ...
@@ -70,6 +70,8 @@ package cl.agj.core.debugging {
 			}*/
 			
 			var string:String = text.join(" ");
+			
+			
 			
 			addLine(string);
 			

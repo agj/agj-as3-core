@@ -2,6 +2,7 @@ package cl.agj.core.utils {
 	
 	import flash.system.ApplicationDomain;
 	import flash.utils.getQualifiedClassName;
+	
 
 	/**
 	 * A collection of static functions to use with arrays and vectors.
@@ -46,6 +47,45 @@ package cl.agj.core.utils {
 				return true;
 			}
 			return false;
+		}
+		
+		/**
+		 * The advantage over Array and Vector's indexOf is that this takes advantage of IComparableByValue when applicable.
+		 */
+		public static function indexOf(list:Object, item:Object, fromIndex:uint = 0):int {
+			if (!(item is IComparableByValue))
+				return list.indexOf(item);
+			for (var i:int = fromIndex, len:int = list.length; i < len; i++) {
+				if (item.equals(list[i]))
+					return i;
+			}
+			return -1;
+		}
+		
+		/**
+		 * Leaves only the first of every redundant item in a list. Modifies the object itself.
+		 */
+		public static function removeRedundants(list:Object):void {
+			for (var i:int = list.length - 1; i >= 0; i--) {
+				for (var j:int = i - 1; j >= 0; j--) {
+					if (Tools.areEqual(list[i], list[j])) {
+						list.splice(i, 1);
+						continue;
+					}
+				}
+			}
+		}
+		
+		public static function areEqual(list1:Object, list2:Object):Boolean {
+			if (!list1 && !list2)
+				return true;
+			if (!list1 || !list2 || list1.length !== list2.length)
+				return false;
+			for (var i:int = 0, len:int = list1.length; i < len; i++) {
+				if ( list1[i] !== list2[i] && (!(list1[i] is IComparableByValue) || !IComparableByValue(list1[i]).equals(list2[i])) )
+					return false;
+			}
+			return true;
 		}
 		
 		public static function getRandom(list:Object):* {
@@ -141,11 +181,11 @@ package cl.agj.core.utils {
 		 * The list's length must be width * height.
 		 */
 		public static function set2D(list:Object, value:*, x:uint, y:uint, width:uint):void {
-			if (isList(list)) {
-				var index:int = x + (y * width);
-				if (index < list.length)
-					list[index] = value;
-			}
+			var index:int = x + (y * width);
+			if (index < list.length)
+				list[index] = value;
+			else
+				throw new ArgumentError("The resulting index exceeds the length of the passed list.");
 		}
 		
 		/**
@@ -153,20 +193,18 @@ package cl.agj.core.utils {
 		 * The list's length must be width * height.
 		 */
 		public static function get2D(list:Object, x:uint, y:uint, width:uint):* {
-			if (isList(list)) {
-				var index:int = x + (y * width);
-				if (index < list.length)
-					return list[index];
-			}
+			if (x >= width)
+				return null;
+			var index:int = x + (y * width);
+			if (index < list.length)
+				return list[index];
 			return null;
 		}
 		
 		public static function get2DIndex(list:Object, x:uint, y:uint, width:uint):int {
-			if (isList(list)) {
-				var index:int = x + (y * width);
-				if (index < list.length)
-					return index;
-			}
+			var index:int = x + (y * width);
+			if (index < list.length)
+				return index;
 			return -1;
 		}
 		
@@ -187,21 +225,21 @@ package cl.agj.core.utils {
 		}
 		
 		public static function has(list:Object, item:*):Boolean {
-			if (!isList(list))
-				return false;
-			return (list.indexOf(item) >= 0);
+			return (indexOf(list, item) >= 0);
 		}
 		
-		public static function vectorToArray(vector:Object):Array {
-			if (!isVector(vector, false))
-				return null;
-			
-			var array:Array = [];
-			var len:uint = vector.length;
-			for (var i:uint = 0; i < len; i++) {
-				array[i] = vector[i];
+		/**
+		 * Takes an object and converts it to an array. Particularly useful for vectors; other objects are just wrapped in an array.
+		 */
+		public static function toArray(obj:Object):Array {
+			if (isVector(obj, false)) {
+				var array:Array = [];
+				for (var i:int = 0, len:int = obj.length; i < len; i++) {
+					array[i] = obj[i];
+				}
+				return array;
 			}
-			return array;
+			return [obj];
 		}
 		
 		/**
@@ -218,6 +256,15 @@ package cl.agj.core.utils {
 			if (fixedLength > 0)
 				return new definition(fixedLength, true);
 			return new definition();
+		}
+		
+		static public function fillAndSet(lista:Object, item:*, index:uint, fillWith:* = null):void {
+			if (!isList(lista, false))
+				throw new ArgumentError("Argument 'list' is not a list.");
+			while (lista.length < index) {
+				lista.push(fillWith);
+			}
+			lista[index] = item;
 		}
 		
 		/////

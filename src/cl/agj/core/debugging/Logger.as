@@ -1,6 +1,7 @@
 package cl.agj.core.debugging {
 	import flash.system.Capabilities;
 	import flash.utils.getQualifiedClassName;
+	import flash.utils.getTimer;
 	
 	import org.osflash.signals.Signal;
 	
@@ -34,11 +35,16 @@ package cl.agj.core.debugging {
 				}
 			}
 			
+			var timestamp:String = "";
+			if (useTimestamps) {
+				timestamp = "@" + formatTime(getTimer());
+			}
+			
 			if (enableTrace && Capabilities.isDebugger)
-				trace("[LOG: " + className + "] " + string);
+				trace("[LOG: " + className + (timestamp ? " " + timestamp : "") + "] " + string);
 			
 			if (_logged && _logged.numListeners > 0)
-				_logged.dispatch(className, string);
+				_logged.dispatch(className, (timestamp ? timestamp + " " : "") + string);
 		}
 		
 		/** Returns: className:String, message:String */
@@ -46,6 +52,21 @@ package cl.agj.core.debugging {
 			if (!_logged)
 				_logged = new Signal(String, String);
 			return _logged;
+		}
+		
+		static private var _useTimestamps:Boolean = false;
+		static public function get useTimestamps():Boolean {
+			return _useTimestamps;
+		}
+		static public function set useTimestamps(value:Boolean):void {
+			_useTimestamps = value;
+		}
+		
+		/////
+		
+		static private function formatTime(time:int):String {
+			var t:String = time.toString();
+			return t.length <= 3 ? t : t.substr(0, -3) + '"' + t.substr(-3);
 		}
 		
 	}

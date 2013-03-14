@@ -2,6 +2,10 @@ package cl.agj.core.events {
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	
+	/**
+	 * The idea for this didn't work.
+	 * @deprecated
+	 */
 	public class ListenerListUpdated {
 		
 		public var _list:Dictionary = new Dictionary(true);

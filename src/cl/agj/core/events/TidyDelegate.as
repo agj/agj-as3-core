@@ -1,10 +1,10 @@
 package cl.agj.core.events {
 	
-	import cl.agj.core.IDestroyable;
-	
 	import flash.events.Event;
 	import flash.events.EventPhase;
 	import flash.events.IEventDispatcher;
+	
+	import cl.agj.core.IDestroyable;
 	
 	import org.osflash.signals.DeluxeSignal;
 	import org.osflash.signals.events.GenericEvent;
@@ -113,7 +113,7 @@ package cl.agj.core.events {
 			if (!_receiver)
 				return;
 			var lvo:ListenerVO;
-			for each (lvo in _outboundListeners.list) {
+			for each (lvo in _outboundListeners.getList()) {
 				_receiver.removeEventListener(lvo.type, lvo.listener, lvo.useCapture);
 			}
 			_outboundListeners.clear();

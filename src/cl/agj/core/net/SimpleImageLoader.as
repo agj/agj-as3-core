@@ -5,20 +5,17 @@ package cl.agj.core.net {
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLRequest;
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
 	import flash.system.SecurityDomain;
 	
+	import org.osflash.signals.DeluxeSignal;
 	import org.osflash.signals.events.GenericEvent;
 	
 	public class SimpleImageLoader extends AbstractSimpleLoader {
-		
-		protected var _image:DisplayObject;
-		protected var _finalURL:String;
-		protected var _restrictedDomain:Boolean;
-		protected var _loader:Loader;
 		
 		public function SimpleImageLoader(url:String, retries:uint = 0, applicationDomain:ApplicationDomain = null, securityDomain:SecurityDomain = null) {
 			super(url, retries, applicationDomain, securityDomain);
@@ -32,10 +29,14 @@ package cl.agj.core.net {
 			registerListener(loader.contentLoaderInfo, IOErrorEvent.IO_ERROR, onLoadError);
 			registerListener(loader.contentLoaderInfo, SecurityErrorEvent.SECURITY_ERROR, onLoadError);
 			_loader.load(request, new LoaderContext(true, _applicationDomain, _securityDomain));
-			//loader.load(request, new LoaderContext(true));
 		}
 		
 		///////
+		
+		protected var _image:DisplayObject;
+		protected var _finalURL:String;
+		protected var _isDomainRestricted:Boolean;
+		protected var _loader:Loader;
 		
 		public function get loader():Loader {
 			return _loader;
@@ -49,16 +50,27 @@ package cl.agj.core.net {
 			return _image;
 		}
 		
-		public function get restrictedDomain():Boolean {
-			return _restrictedDomain;
+		public function get isDomainRestricted():Boolean {
+			return _isDomainRestricted;
+		}
+		
+		override public function get progress():Number {
+			return _image ? 1 : _loader && _loader.contentLoaderInfo ? !_loader.contentLoaderInfo.bytesLoaded ? 0 : _loader.contentLoaderInfo.bytesLoaded / _loader.contentLoaderInfo.bytesTotal : 0;
+		}
+		
+		override public function get progressed():DeluxeSignal {
+			if (!_progressed && _loader) {
+				registerListener(_loader, ProgressEvent.PROGRESS, onProgress);
+			}
+			return super.progressed;
 		}
 		
 		///////
 		
 		override protected function onLoaded(e:Event):void {
 			var loaderInfo:LoaderInfo = e.currentTarget as LoaderInfo;
-			_restrictedDomain = (!loaderInfo.childAllowsParent);
-			if (!_restrictedDomain) {
+			_isDomainRestricted = (!loaderInfo.childAllowsParent);
+			if (!_isDomainRestricted) {
 				_image = loaderInfo.content;
 			} else {
 				_image = loaderInfo.loader;

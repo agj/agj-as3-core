@@ -1,8 +1,5 @@
 package cl.agj.core.events {
-	import cl.agj.core.events.ListenerVO;
-	
 	import flash.events.IEventDispatcher;
-	import flash.utils.Dictionary;
 	
 	/**
 	 * Deprecated in favor of ListenerListUpdated, but changes haven't reflected this yet.
@@ -73,9 +70,7 @@ package cl.agj.core.events {
 			return result;
 		}
 		
-		/////
-		
-		public function get list():Vector.<ListenerVO> {
+		public function getList():Vector.<ListenerVO> {
 			return _list;
 		}
 		

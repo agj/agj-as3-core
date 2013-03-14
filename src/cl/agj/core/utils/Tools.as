@@ -4,6 +4,10 @@ package cl.agj.core.utils {
 	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
@@ -13,6 +17,10 @@ package cl.agj.core.utils {
 	 * @author agj
 	 */
 	public class Tools {
+		
+		static public function openURL(url:String, newWindow:Boolean = false):void {
+			navigateToURL(new URLRequest(url), newWindow ? "_blank" : null);
+		}
 		
 		/**
 		 * Matches a string against two vectors, one with a list of OR-conditioned required matches,
@@ -85,6 +93,25 @@ package cl.agj.core.utils {
 		}
 		
 		/**
+		 * Compares two objects strictly by identity, but if they are IComparableByValue, Array, Vector, Rectangle, or Point, they are compared by their value.
+		 */
+		static public function areEqual(obj1:Object, obj2:Object):Boolean {
+			if (obj1 is IComparableByValue) {
+				return obj1.equals(obj2);
+			}
+			if (obj1 is Point && obj2 is Point) {
+				return obj1.x === obj2.x && obj1.y === obj2.y;
+			}
+			if (obj1 is Rectangle && obj2 is Rectangle) {
+				return obj1.x === obj2.x && obj1.y === obj2.y && obj1.width === obj2.width && obj1.height === obj2.height;
+			}
+			if (ListUtil.isList(obj1, false) && ListUtil.isList(obj2, false)) {
+				return ListUtil.areEqual(obj1, obj2);
+			}
+			return obj1 === obj2;
+		}
+		
+		/**
 		 * Executes the passed function the next frame. Useful to make sure the screen gets updated before
 		 * a processing-intensive operation.
 		 */
@@ -98,12 +125,15 @@ package cl.agj.core.utils {
 			_dispatcher.addEventListener(Event.ENTER_FRAME, onFrameJump);
 		}
 		
-		static public function callLater(callback:Callback, time:uint):void {
+		static public function callLater(callback:Object, time:uint = 0):void {
+			if (!(callback is Function) && !(callback is Callback))
+				throw new ArgumentError("Expected Function or Callback object as argument 'callback'.");
+			
 			var now:uint = getTimer();
 			var ringTime:uint = now + time;
 			if (!_forLater)
 				_forLater = new Dictionary;
-			var callbacks:Vector.<Callback> = _forLater[ringTime] ||= new Vector.<Callback>;
+			var callbacks:Vector.<Object> = _forLater[ringTime] ||= new Vector.<Object>;
 			callbacks.push(callback);
 			
 			checkAndRestartLaterTimer(false);
@@ -129,7 +159,7 @@ package cl.agj.core.utils {
 			var next:Number = NaN;
 			for (var time:Object in _forLater) {
 				if (callOutstanding && time <= now) {
-					for each (var cb:Callback in _forLater[time]) {
+					for each (var cb:Object in _forLater[time]) {
 						callCallback(cb);
 					}
 					delete _forLater[time];
@@ -175,9 +205,12 @@ package cl.agj.core.utils {
 		}
 		*/
 		
-		static private function callCallback(callback:Callback):void {
-			if (callback && callback.func !== null)
-				callback.func.apply(callback.context, ((callback.params) ? callback.params : []));
+		static private function callCallback(callback:Object):void {
+			if (callback is Function) {
+				callback();
+			} else if (callback is Callback && callback.func) {
+				callback.func.apply(callback.context, callback.params ? callback.params : []);
+			}
 		}
 		
 	}

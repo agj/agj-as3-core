@@ -1,8 +1,10 @@
 package cl.agj.core.utils {
-	import cl.agj.core.IDestroyable;
-	
+	import flash.display.Sprite;
 	import flash.errors.IllegalOperationError;
+	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
+	
+	import cl.agj.core.IDestroyable;
 	
 	/**
 	 * Singleton that manages reusable objects, so as to minimize repeated creation and destruction of the same kind
@@ -50,18 +52,18 @@ package cl.agj.core.utils {
 			var object:Object;
 			var node:LinkedListNode = _collection[type];
 			
-			if (!(type is IDestroyable) && parameters.length > 0)
-				throw new IllegalOperationError("Non-supported use case: Parameters passed for a type that does not implement IDestroyable.");
+			//if (!(type is IRecyclable) && parameters.length > 0)
+			//	throw new IllegalOperationError("Non-supported use case: Parameters passed for a type that does not implement IRecyclable.");
 			
 			while (node) {
 				object = node.head;
-				_collection[type] = object.tail;
-				if (object is IDestroyable && object.destroyed) {
+				_collection[type] = node.tail;
+				if (object is IDestroyable && object.isDestroyed) {
 					node = node.tail;
 					continue;
 				}
 				if (object is IRecyclable)
-					object.activate.apply(null, parameters);
+					object.wake.apply(null, parameters);
 				return object;
 			}
 			

@@ -6,6 +6,7 @@ package cl.agj.core.preloader {
 	
 	/**
 	 * A class intended to be extended in order to make a preloader with. Has the basic necessary stuff already in place.
+	 * 
 	 * @author agj
 	 */
 	public class AbstractPreloader extends MovieClip {
@@ -47,7 +48,7 @@ package cl.agj.core.preloader {
 		}
 		
 		/**
-		 * Called every time the progress amount changes.
+		 * Called every time the progress amount changes. Use to animate the load bar, etc.
 		 */
 		protected function onProgress():void { }
 		

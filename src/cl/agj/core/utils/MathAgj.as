@@ -121,8 +121,10 @@ package cl.agj.core.utils {
 			return point;
 		}
 		
-		public static function cartesianToRadians(x:Number, y:Number):Number {
-			return Math.atan2(y, x);
+		public static function cartesianToRadians(xOrPoint:Object, y:Number = NaN):Number {
+			if (xOrPoint is Point)
+				return Math.atan2(xOrPoint.y, xOrPoint.x);
+			return Math.atan2(y, Number(xOrPoint));
 		}
 		
 		/** This is geometrically incorrect. */
@@ -179,12 +181,27 @@ package cl.agj.core.utils {
 			return num;
 		}
 		
+		public static function getDifference(a:Number, b:Number):Number {
+			return (a > b) ? a - b : b - a;
+		}
+		
+		public static function logBase(base:Number, x:Number):Number {
+			return Math.log(x) / Math.log(base);
+		}
+		
+		public static function root(n:Number, x:Number):Number {
+			return Math.pow(x, 1 / n);
+		}
+		
+		static public const TAU:Number = Math.PI * 2;
+		/*
 		protected static var _tau:Number;
 		public static function get TAU():Number {
 			if (!_tau)
 				_tau = Math.PI * 2;
 			return _tau;
 		}
+		//*/
 		
 		protected static var _halfPi:Number;
 		public static function get HALF_PI():Number {

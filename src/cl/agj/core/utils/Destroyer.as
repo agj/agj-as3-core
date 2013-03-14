@@ -15,9 +15,10 @@ package cl.agj.core.utils {
 	public class Destroyer {
 		
 		public static function destroy(destroyables:*):void {
-			if (destroyables && !ListUtil.isList(destroyables, false)) {
-				throw new Error("Destroyer: Must pass an Array or Vector object. Passed instead:", getQualifiedClassName(destroyables));
+			if (!destroyables) {
 				return;
+			} else if (!ListUtil.isList(destroyables, false)) {
+				throw new Error("Destroyer: Must pass an Array or Vector object. Passed instead:", getQualifiedClassName(destroyables));
 			}
 			
 			if (destroyables.length === 0)
@@ -47,8 +48,6 @@ package cl.agj.core.utils {
 					trace("Destroyed Loader", d);
 				} else if (d is DisplayObjectContainer) {
 					destroyDisplayObject(DisplayObject(d));
-				} else if (d is Callback) {
-					Callback(d).func = null;
 				} else if (ListUtil.isList(d, false)) {
 					if (d.length > 0)
 						destroy(d);

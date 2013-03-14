@@ -17,6 +17,8 @@ package cl.agj.core.display {
 		/////////
 		
 		override public function destroy():void {
+			if (isDestroyed)
+				return;
 			_tidyDelegate.destroy();
 			_tidyDelegate = null;
 			super.destroy();
@@ -32,11 +34,15 @@ package cl.agj.core.display {
 		}
 		
 		override public function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void {
+			if (!_tidyDelegate)
+				return;
 			_tidyDelegate.removeEventListener(type, listener, useCapture);
 			super.removeEventListener(type, listener, useCapture);
 		}
 		
 		public function removeEventsForListener(listener:Function):void {
+			if (!_tidyDelegate)
+				return;
 			_tidyDelegate.removeEventsForListener(listener);
 		}
 		
