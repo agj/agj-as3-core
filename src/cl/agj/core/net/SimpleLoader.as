@@ -37,7 +37,7 @@ package cl.agj.core.net {
 		}
 		
 		override public function get progress():Number {
-			return _data ? 1 : _loader ? _loader.bytesTotal ? _loader.bytesLoaded / _loader.bytesTotal : 0 : 0;
+			return _data ? 1 : _loader ? _loader.bytesTotal ? Math.min(1, _loader.bytesLoaded / _loader.bytesTotal) : 0 : 0;
 		}
 		
 		override public function get progressed():DeluxeSignal {

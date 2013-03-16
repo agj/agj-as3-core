@@ -55,7 +55,7 @@ package cl.agj.core.net {
 		}
 		
 		override public function get progress():Number {
-			return _image ? 1 : _loader && _loader.contentLoaderInfo ? !_loader.contentLoaderInfo.bytesLoaded ? 0 : _loader.contentLoaderInfo.bytesLoaded / _loader.contentLoaderInfo.bytesTotal : 0;
+			return _image ? 1 : _loader && _loader.contentLoaderInfo ? !_loader.contentLoaderInfo.bytesLoaded ? 0 : Math.min(1, _loader.contentLoaderInfo.bytesLoaded / _loader.contentLoaderInfo.bytesTotal) : 0;
 		}
 		
 		override public function get progressed():DeluxeSignal {
