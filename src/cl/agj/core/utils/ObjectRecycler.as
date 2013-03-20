@@ -5,6 +5,7 @@ package cl.agj.core.utils {
 	import flash.utils.Dictionary;
 	
 	import cl.agj.core.IDestroyable;
+	import cl.agj.core.datastructures.LinkedListNode;
 	
 	/**
 	 * Singleton that manages reusable objects, so as to minimize repeated creation and destruction of the same kind

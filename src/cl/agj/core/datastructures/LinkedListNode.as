@@ -1,4 +1,4 @@
-package cl.agj.core.utils {
+package cl.agj.core.datastructures {
 	
 	/**
 	 * Very basic implementation of linked lists, in a single class.

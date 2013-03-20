@@ -1,10 +1,10 @@
 package cl.agj.core.display  {
-	import flash.display.Sprite;
-	import flash.events.Event;
-	
 	import cl.agj.core.IDestroyable;
 	import cl.agj.core.utils.Destroyer;
-	import cl.agj.core.utils.Tools;
+	import cl.agj.core.utils.Delay;
+	
+	import flash.display.Sprite;
+	import flash.events.Event;
 	
 	import org.osflash.signals.DeluxeSignal;
 	import org.osflash.signals.events.GenericEvent;
@@ -21,7 +21,7 @@ package cl.agj.core.display  {
 		//protected var _destroyableProperties:Vector.<String>;
 		
 		public function Graphic() {
-			if (stage) Tools.callLater(init);
+			if (stage) Delay.tillLater(init);
 			else addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
 		}
 		protected function addedToStageHandler(e:Event = null):void {
