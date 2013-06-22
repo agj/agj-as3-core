@@ -60,7 +60,7 @@ package cl.agj.core.net {
 		
 		override public function get progressed():DeluxeSignal {
 			if (!_progressed && _loader) {
-				registerListener(_loader, ProgressEvent.PROGRESS, onProgress);
+				registerListener(_loader.contentLoaderInfo, ProgressEvent.PROGRESS, onProgress);
 			}
 			return super.progressed;
 		}
