@@ -33,7 +33,7 @@ package cl.agj.core.patterns.enum {
 			if (!_values) {
 				_values = [];
 				for (var i:int = 0, len:int = this.length; i < len; i++) {
-					_values[i] = this[i];
+					_values[i] = Enum(this[i]).value;
 				}
 			}
 			return _values;
