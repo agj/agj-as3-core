@@ -1,10 +1,5 @@
 package cl.agj.core.patterns.enum {
-	import cl.agj.core.utils.ListUtil;
-	import cl.agj.core.utils.Tools;
-	
 	import flash.utils.Dictionary;
-	
-	import org.idmedia.as3commons.lang.IllegalArgumentException;
 
 	/**
 	 * Offers a simple way to list Enum elements, for use in classes that extend Enum.
@@ -18,10 +13,10 @@ package cl.agj.core.patterns.enum {
 		 */
 		public function EnumList(list:Array) {
 			if (!list)
-				throw new IllegalArgumentException("list cannot be null.");
+				throw new ArgumentError("list cannot be null.");
 			for (var i:int = 0, len:int = list.length; i < len; i++) {
 				if (!(list[i] is Enum))
-					throw new IllegalArgumentException("Passed value '" + list[i] + "' in list is not of type Enum.");
+					throw new ArgumentError("Passed value '" + list[i] + "' in list is not of type Enum.");
 				this[i] = list[i];
 			}
 		}

@@ -1,9 +1,6 @@
 package cl.agj.core.patterns.enum {
 	import flash.utils.describeType;
-	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
-	
-	import org.idmedia.as3commons.lang.IllegalArgumentException;
 	
 	/**
 	 * Offers a simple way to list Enum elements, for use in classes that extend Enum.
@@ -23,7 +20,7 @@ package cl.agj.core.patterns.enum {
 		public function AutoEnumList(type:Class) {
 			var error:Error
 			if (!type)
-				error = new IllegalArgumentException("'type' cannot be null.");
+				error = new ArgumentError("'type' cannot be null.");
 			
 			var list:Array = [];
 			if (!error) {

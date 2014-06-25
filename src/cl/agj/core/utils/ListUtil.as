@@ -13,6 +13,26 @@ package cl.agj.core.utils {
 		public static const VECTOR_CLASS_NAME:String = getQualifiedClassName(Vector);
 		
 		/**
+		 * Returns the first item matching predicate in list.
+		 */
+		public static function first(list:Object, predicate:Function):* {
+			for (var i:int = 0, len:int = list.length; i < len; i++) {
+				if (predicate(list[i], i, list)) return list[i];
+			}
+			return null;
+		}
+		
+		/**
+		 * Returns the last item matching predicate in list.
+		 */
+		public static function last(list:Object, predicate:Function):* {
+			for (var i:int = list.length - 1; i >= 0; i--) {
+				if (predicate(list[i], i, list)) return list[i];
+			}
+			return null;
+		}
+		
+		/**
 		 * Returns true if object is an Array or a Vector, and optionally checks if it is populated.
 		 */
 		public static function isList(object:Object, excludeEmpty:Boolean = true):Boolean {

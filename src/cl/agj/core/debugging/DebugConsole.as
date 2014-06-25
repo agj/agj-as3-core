@@ -1,4 +1,7 @@
 package cl.agj.core.debugging {
+	import cl.agj.core.TidyListenerRegistrar;
+	
+	import flash.display.Graphics;
 	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.display.Stage;
@@ -6,10 +9,6 @@ package cl.agj.core.debugging {
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
-	
-	import cl.agj.core.TidyListenerRegistrar;
-	import cl.agj.graphics.Draw;
-	import cl.agj.graphics.DrawStyle;
 	
 	/**
 	 * ...
@@ -44,7 +43,11 @@ package cl.agj.core.debugging {
 			_text.text = _DEFAULT_TEXT;
 			
 			var background:Shape = new Shape;
-			Draw.rectangle(background.graphics, new DrawStyle(0x000000, 0.7), new Rectangle(0, 0, theStage.stageWidth, theStage.stageHeight));
+			var g:Graphics = background.graphics;
+			g.beginFill(0x000000, 0.7);
+			g.drawRect(0, 0, theStage.stageWidth, theStage.stageHeight);
+			g.endFill();
+			//Draw.rectangle(background.graphics, new DrawStyle(0x000000, 0.7), new Rectangle(0, 0, theStage.stageWidth, theStage.stageHeight));
 			
 			graphic = new Sprite;
 			graphic.addChild(background);
