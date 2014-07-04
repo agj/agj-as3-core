@@ -28,8 +28,7 @@ package cl.agj.core.events {
 		}
 		
 		public function clear():void {
-			var lvo:ListenerVO;
-			for (lvo in _list) {
+			for (var lvo:Object in _list) {
 				delete _list[lvo];
 			}
 		}
@@ -41,8 +40,8 @@ package cl.agj.core.events {
 		}
 		
 		public function getListener(object:IEventDispatcher, eventType:String, listener:Function, useCapture:Boolean):ListenerVO {
-			var lvo:ListenerVO;
-			for (lvo in _list) {
+			for (var l:Object in _list) {
+				var lvo:ListenerVO = l as ListenerVO;
 				if (lvo.object === object && lvo.type === eventType && lvo.listener === listener && lvo.useCapture === useCapture) {
 					return lvo;
 				}
@@ -55,10 +54,10 @@ package cl.agj.core.events {
 		 * matching listeners.
 		 */
 		public function getMatchingListeners(object:IEventDispatcher = null, eventType:String = null, listener:Function = null, useCapture:Object = null):Vector.<ListenerVO> {
-			var lvo:ListenerVO;
 			var result:Vector.<ListenerVO> = new Vector.<ListenerVO>;
 			var useCaptureIsBoolean:Boolean = (useCapture is Boolean);
-			for (lvo in _list) {
+			for (var l:Object in _list) {
+				var lvo:ListenerVO = l as ListenerVO;
 				if ( (!object || object === lvo.object)
 					&& (!eventType || eventType === lvo.type)
 					&& (!listener || listener === lvo.listener)
@@ -72,10 +71,9 @@ package cl.agj.core.events {
 		}
 		
 		public function getList():Vector.<ListenerVO> {
-			var lvo:ListenerVO;
 			var result:Vector.<ListenerVO> = new Vector.<ListenerVO>;
-			for (lvo in _list) {
-				result.push(lvo);
+			for (var l:Object in _list) {
+				result.push(l);
 			}
 			return result;
 		}

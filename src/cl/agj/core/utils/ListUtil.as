@@ -15,21 +15,60 @@ package cl.agj.core.utils {
 		/**
 		 * Returns the first item matching predicate in list.
 		 */
-		public static function first(list:Object, predicate:Function):* {
+		static public function find(list:Object, predicate:Function, thisArg:* = null):* {
+			var index:int = findIndex(list, predicate, thisArg);
+			return index > -1 ? list[index] : null;
+		}
+		
+		/**
+		 * Returns the first item's index matching predicate in list.
+		 */
+		static public function findIndex(list:Object, predicate:Function, thisArg:* = null):int {
+			var argsNum:int = Math.max(predicate.length, 1);
 			for (var i:int = 0, len:int = list.length; i < len; i++) {
-				if (predicate(list[i], i, list)) return list[i];
+				if (predicate.apply(thisArg, [list[i], i, list].slice(0, argsNum))) return i;
 			}
-			return null;
+			return -1;
 		}
 		
 		/**
 		 * Returns the last item matching predicate in list.
 		 */
-		public static function last(list:Object, predicate:Function):* {
+		public static function findLast(list:Object, predicate:Function, thisArg:* = null):* {
+			var index:int = findLastIndex(list, predicate, thisArg);
+			return index > -1 ? list[index] : null;
+		}
+		
+		/**
+		 * Returns the last item's index matching predicate in list.
+		 * 
+		 * @param predicate		function (currentItem:*[, index:int, list]):*;
+		 */
+		public static function findLastIndex(list:Object, predicate:Function, thisArg:* = null):* {
+			var argsNum:int = Math.max(predicate.length, 1);
 			for (var i:int = list.length - 1; i >= 0; i--) {
-				if (predicate(list[i], i, list)) return list[i];
+				if (predicate.apply(thisArg, [list[i], i, list].slice(0, argsNum))) return i;
 			}
-			return null;
+			return -1;
+		}
+		
+		/**
+		 * Accumumulates values in list into a single value, using the supplied callback function's return value.
+		 * 
+		 * @param callback		function (accumulated:*, currentItem:*[, index:int, list]):*;
+		 */
+		public static function reduce(list:Object, callback:Function, initialValue:* = undefined, thisArg:* = null):* {
+			var curr:* = initialValue;
+			var i:int = 0;
+			if (curr === undefined) {
+				curr = list[0];
+				i = 1;
+			}
+			var argsNum:int = Math.max(callback.length, 2);
+			for (var len:int = list.length; i < len; i++) {
+				if (i in list) curr = callback.apply(thisArg, [curr, list[i], i, list].slice(0, argsNum));
+			}
+			return curr;
 		}
 		
 		/**
@@ -244,6 +283,20 @@ package cl.agj.core.utils {
 			}
 		}
 		
+		public static function flatten(list:Object, levels:int = 0):Array {
+			return reduce(list, function (result:Array, item:*):Array {
+				if (isList(item)) {
+					return result.concat(
+						levels <= 0 || levels > 1 ?
+							flatten(item, levels - 1)
+							: item
+					);
+				}
+				result.push(item);
+				return result;
+			}, []);
+		}
+		
 		public static function has(list:Object, item:*):Boolean {
 			return (indexOf(list, item) >= 0);
 		}
@@ -326,6 +379,23 @@ package cl.agj.core.utils {
 				return index;
 			}
 			return -1;
+		}
+		
+		static public function permutations(list:Object):Array {
+			const len:uint = list.length;
+			if (len <= 1)
+				return [list];
+			var resultado:Array = [];
+			for (var i:int = 0; i < len; i++) {
+				var excluyente:Array = list.concat();
+				excluyente.splice(i, 1);
+				var permutaciones:Array = permutations(excluyente);
+				for each (var perm:Array in permutaciones) {
+					perm.push(list[i]);
+				}
+				resultado = resultado.concat(permutaciones);
+			}
+			return resultado;
 		}
 		
 	}
