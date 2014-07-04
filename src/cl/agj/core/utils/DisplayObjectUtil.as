@@ -2,10 +2,14 @@ package cl.agj.core.utils {
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.FrameLabel;
+	import flash.display.InteractiveObject;
 	import flash.display.MovieClip;
+	import flash.display.Sprite;
+	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.media.SoundTransform;
 	import flash.utils.Dictionary;
 	
 	public class DisplayObjectUtil {
@@ -55,12 +59,9 @@ package cl.agj.core.utils {
 		}
 		
 		public static function hasLabel(mc:MovieClip, labelName:String):Boolean {
-			var labels:Array = mc.currentLabels;
-			for each (var label:FrameLabel in labels) {
-				if (label.name === labelName)
-					return true;
-			}
-			return false;
+			return mc.currentLabels.some( function (label:FrameLabel, ...etc):Boolean {
+				return label.name === labelName;
+			});
 		}
 		
 		/**
@@ -91,43 +92,122 @@ package cl.agj.core.utils {
 			return duplicate;
 		}		
 		
-		public static function callOnStop(mc:MovieClip, callback:Callback):void {
-			if (!_waitingForStop)
-				_waitingForStop = new Dictionary;
-			_waitingForStop[mc] = { callback: callback, ultimoFrame: mc.currentFrame };
-			
-			mc.addEventListener(Event.ENTER_FRAME, alPasarFrame);
+		public static function callOnStop(mc:MovieClip, callback:Function):void {
+			var previousFrame:int = mc.currentFrame;
+			mc.addEventListener(Event.ENTER_FRAME, function self(e:Event):void {
+				if (mc.currentFrame === previousFrame) {
+					mc.removeEventListener(Event.ENTER_FRAME, self);
+					callback();
+				} else {
+					previousFrame = mc.currentFrame;
+				}
+			});
 		}
 		
-		public static function cancelCallOnStop(mc:MovieClip, callback:Callback):void {
-			var info:Object;
-			for (var keyMC:Object in _waitingForStop) {
-				if (keyMC === mc) {
-					info = _waitingForStop[keyMC];
-					if (info.callback === callback) {
-						mc.removeEventListener(Event.ENTER_FRAME, alPasarFrame);
-						delete _waitingForStop[mc];
-					}
-				}
+		/**
+		 * Hace una revisión profunda de todos los padres para revisar si efectivamente el DisplayObject está visible.
+		 */
+		public static function estaVisible(mc:DisplayObject):Boolean {
+			if (!mc.stage)
+				return false;
+			while (!(mc is Stage)) {
+				if (!mc.visible)
+					return false;
+				mc = mc.parent;
+			}
+			return true;
+		}
+		
+		/**
+		 * Hace una revisión profunda de todos los padres para revisar si efectivamente el DisplayObject está activo al mouse.
+		 */
+		public static function isMouseEnabled(mc:InteractiveObject):Boolean {
+			if (!mc.stage || !mc.mouseEnabled) return false;
+			var doc:DisplayObjectContainer = mc.parent;
+			while (!(doc is Stage)) {
+				if (!doc.mouseChildren) return false;
+				doc = doc.parent;
+			}
+			return true;
+		}
+		
+		public static function detenerHijos(obj:DisplayObjectContainer):void {
+			if (obj is MovieClip)
+				MovieClip(obj).stop();
+			const len:uint = obj.numChildren;
+			var hijo:DisplayObject;
+			for (var i:uint = 0; i < len; i++) {
+				hijo = obj.getChildAt(i);
+				if (hijo is DisplayObjectContainer)
+					detenerHijos(DisplayObjectContainer(hijo));
 			}
 		}
 		
-		/////
+		public static function desmembrar(obj:DisplayObjectContainer):void {
+			var hijo:DisplayObject;
+			for (var i:int = obj.numChildren - 1; i >= 0; i--) {
+				hijo = obj.getChildAt(i);
+				if (hijo is DisplayObjectContainer) {
+					desmembrar(DisplayObjectContainer(hijo));
+				}
+				if (hijo && hijo.parent === obj)
+					obj.removeChild(hijo);
+			}
+		}
 		
-		private static var _waitingForStop:Dictionary;
+		public static function callar(obj:DisplayObjectContainer):void {
+			if (obj is Sprite)
+				Sprite(obj).soundTransform = new SoundTransform(0);
+			const len:uint = obj.numChildren;
+			var hijo:DisplayObject;
+			for (var i:uint = 0; i < len; i++) {
+				hijo = obj.getChildAt(i);
+				if (hijo is DisplayObjectContainer)
+					callar(DisplayObjectContainer(hijo));
+			}
+		}
 		
-		private static function alPasarFrame(e:Event):void {
-			var mc:MovieClip = MovieClip(e.currentTarget);
-			var info:Object = _waitingForStop[mc];
-			var callback:Callback = info.callback;
-			var ultimoFrame:uint = info.ultimoFrame;
+		public static function pausar(obj:DisplayObjectContainer):void {
+			if (!_chequeandoReproduciendo) {
+				_chequeandoReproduciendo = new Dictionary(true);
+				obj.addEventListener(Event.ENTER_FRAME, chequearReproduciendose);
+			}
 			
-			if (mc.currentFrame === ultimoFrame) {
-				mc.removeEventListener(Event.ENTER_FRAME, alPasarFrame);
-				delete _waitingForStop[mc];
-				callback.func.apply(callback.context, callback.params);
-			} else {
-				info.ultimoFrame = mc.currentFrame;
+			const len:uint = obj.numChildren;
+			var hijo:DisplayObject;
+			if (obj is MovieClip) {
+				const mc:MovieClip = MovieClip(obj);
+				_chequeandoReproduciendo[mc] = mc.currentFrame;
+			}
+			for (var i:uint = 0; i < len; i++) {
+				hijo = obj.getChildAt(i);
+				if (hijo is DisplayObjectContainer)
+					pausar(hijo as DisplayObjectContainer);
+			}
+		}
+		protected static var _chequeandoReproduciendo:Dictionary;
+		protected static var _pausados:Dictionary;
+		private static function chequearReproduciendose(e:Event):void {
+			e.currentTarget.removeEventListener(Event.ENTER_FRAME, chequearReproduciendose);
+			
+			if (!_pausados)
+				_pausados = new Dictionary(true);
+			
+			var mc:MovieClip;
+			for (var o:Object in _chequeandoReproduciendo) {
+				mc = MovieClip(o);
+				if (_chequeandoReproduciendo[mc] !== mc.currentFrame) {
+					mc.stop();
+					_pausados[mc] = true;
+				}
+			}
+			_chequeandoReproduciendo = null;
+		}
+		
+		public static function reanudarPausados():void {
+			for (var o:Object in _pausados) {
+				o.play();
+				delete _pausados[o];
 			}
 		}
 		

@@ -2,7 +2,7 @@ package cl.agj.core.events {
 	import flash.events.IEventDispatcher;
 	
 	/**
-	 * Deprecated in favor of ListenerListUpdated, but changes haven't reflected this yet.
+	 * Used by TidyDelegate to keep track of event listeners.
 	 */
 	public class ListenerList {
 		

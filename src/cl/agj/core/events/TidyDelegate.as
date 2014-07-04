@@ -1,14 +1,17 @@
 package cl.agj.core.events {
 	
+	import cl.agj.core.IDestroyable;
+	
 	import flash.events.Event;
 	import flash.events.EventPhase;
 	import flash.events.IEventDispatcher;
 	
-	import cl.agj.core.IDestroyable;
-	
 	import org.osflash.signals.DeluxeSignal;
 	import org.osflash.signals.events.GenericEvent;
 	
+	/**
+	 * Helps ITidy implementing classes to keep track of event listeners, and to clear them upon destruction.
+	 */
 	public class TidyDelegate implements IDestroyable {
 		
 		protected var _destroyed:DeluxeSignal;

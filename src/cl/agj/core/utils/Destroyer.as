@@ -1,5 +1,7 @@
 package cl.agj.core.utils {
 	
+	import cl.agj.core.IDestroyable;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -10,7 +12,6 @@ package cl.agj.core.utils {
 	import flash.utils.getQualifiedClassName;
 	
 	import org.osflash.signals.ISignal;
-	import cl.agj.core.IDestroyable;
 	
 	public class Destroyer {
 		
@@ -66,7 +67,6 @@ package cl.agj.core.utils {
 				obj is Timer ||
 				obj is Loader ||
 				obj is DisplayObjectContainer ||
-				obj is Callback ||
 				ListUtil.isList(obj, false)
 			);
 		}
