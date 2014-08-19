@@ -115,24 +115,21 @@ package cl.agj.core.utils {
 			if (!(item is IComparableByValue))
 				return list.indexOf(item);
 			for (var i:int = fromIndex, len:int = list.length; i < len; i++) {
-				if (item.equals(list[i]))
-					return i;
+				if (item.equals(list[i])) return i;
 			}
 			return -1;
 		}
 		
 		/**
-		 * Leaves only the first of every redundant item in a list. Modifies the object itself.
+		 * Creates a new Array based on the passed list, without any duplicate items.
 		 */
-		public static function removeRedundants(list:Object):void {
-			for (var i:int = list.length - 1; i >= 0; i--) {
-				for (var j:int = i - 1; j >= 0; j--) {
-					if (Tools.areEqual(list[i], list[j])) {
-						list.splice(i, 1);
-						continue;
-					}
-				}
+		public static function distinct(list:Object):Array {
+			var r:Array = [];
+			for (var i:Object in list) {
+				var item:* = list[i];
+				if (!ListUtil.has(r, item)) r.push(item);
 			}
+			return r;
 		}
 		
 		public static function areEqual(list1:Object, list2:Object):Boolean {
@@ -298,7 +295,7 @@ package cl.agj.core.utils {
 		}
 		
 		public static function has(list:Object, item:*):Boolean {
-			return (indexOf(list, item) >= 0);
+			return indexOf(list, item) !== -1;
 		}
 		
 		/**
@@ -331,13 +328,13 @@ package cl.agj.core.utils {
 			return new definition();
 		}
 		
-		static public function fillAndSet(lista:Object, item:*, index:uint, fillWith:* = null):void {
-			if (!isList(lista, false))
+		static public function fillAndSet(list:Object, item:*, index:uint, fillWith:* = null):void {
+			if (!isList(list, false))
 				throw new ArgumentError("Argument 'list' is not a list.");
-			while (lista.length < index) {
-				lista.push(fillWith);
+			while (list.length < index) {
+				list.push(fillWith);
 			}
-			lista[index] = item;
+			list[index] = item;
 		}
 		
 		/////

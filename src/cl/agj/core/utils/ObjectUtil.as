@@ -13,7 +13,7 @@ package cl.agj.core.utils {
 		static public function values(obj:Object):Array {
 			var result:Array = [];
 			for each (var value:Object in obj) {
-				result.push(obj[value]);
+				result.push(value);
 			}
 			return result;
 		}
